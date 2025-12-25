@@ -1,0 +1,150 @@
+[
+  {
+    "id": "1",
+    "code": "BNA",
+    "name": "BNA - Banque Nationale d'Algérie",
+    "positions": {
+      "city": {
+        "x": 340,
+        "y": 83,
+        "width": 63,
+        "fontSize": 15
+      },
+      "date": {
+        "x": 416,
+        "y": 87,
+        "width": 62,
+        "fontSize": 11
+      },
+      "payee": {
+        "x": 211,
+        "y": 128,
+        "width": 26,
+        "fontSize": 16
+      },
+      "amountInWords": {
+        "x": 120,
+        "y": 240,
+        "width": 500,
+        "fontSize": 12
+      },
+      "amount": {
+        "x": 380,
+        "y": 4,
+        "width": 112,
+        "fontSize": 15
+      }
+    }
+  },
+  {
+    "id": "2",
+    "code": "CPA",
+    "name": "CPA - Crédit Populaire d'Algérie",
+    "positions": {
+      "city": {
+        "x": 50,
+        "y": 100,
+        "width": 150,
+        "fontSize": 14
+      },
+      "date": {
+        "x": 400,
+        "y": 100,
+        "width": 150,
+        "fontSize": 14
+      },
+      "payee": {
+        "x": 120,
+        "y": 180,
+        "width": 400,
+        "fontSize": 14
+      },
+      "amountInWords": {
+        "x": 120,
+        "y": 240,
+        "width": 500,
+        "fontSize": 12
+      },
+      "amount": {
+        "x": 450,
+        "y": 300,
+        "width": 150,
+        "fontSize": 18
+      }
+    }
+  },
+  {
+    "id": "3",
+    "code": "BEA",
+    "name": "BEA - Banque Extérieure d'Algérie",
+    "positions": {
+      "city": {
+        "x": 50,
+        "y": 100,
+        "width": 150,
+        "fontSize": 14
+      },
+      "date": {
+        "x": 400,
+        "y": 100,
+        "width": 150,
+        "fontSize": 14
+      },
+      "payee": {
+        "x": 120,
+        "y": 180,
+        "width": 400,
+        "fontSize": 14
+      },
+      "amountInWords": {
+        "x": 120,
+        "y": 240,
+        "width": 500,
+        "fontSize": 12
+      },
+      "amount": {
+        "x": 450,
+        "y": 300,
+        "width": 150,
+        "fontSize": 18
+      }
+    }
+  },
+  {
+    "id": "4",
+    "code": "BADR",
+    "name": "BADR - Banque de l'Agriculture et du Développement Rural",
+    "positions": {
+      "city": {
+        "x": 50,
+        "y": 100,
+        "width": 150,
+        "fontSize": 14
+      },
+      "date": {
+        "x": 400,
+        "y": 100,
+        "width": 150,
+        "fontSize": 14
+      },
+      "payee": {
+        "x": 120,
+        "y": 180,
+        "width": 400,
+        "fontSize": 14
+      },
+      "amountInWords": {
+        "x": 120,
+        "y": 240,
+        "width": 500,
+        "fontSize": 12
+      },
+      "amount": {
+        "x": 450,
+        "y": 300,
+        "width": 150,
+        "fontSize": 18
+      }
+    }
+  }
+]

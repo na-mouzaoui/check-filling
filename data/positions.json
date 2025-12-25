@@ -1,0 +1,136 @@
+{
+  "1": {
+    "city": {
+      "x": 347,
+      "y": 103,
+      "width": 76,
+      "fontSize": 14
+    },
+    "date": {
+      "x": 434,
+      "y": 104,
+      "width": 81,
+      "fontSize": 13
+    },
+    "payee": {
+      "x": 71,
+      "y": 84,
+      "width": 453,
+      "fontSize": 14
+    },
+    "amountInWords": {
+      "x": 129,
+      "y": 45,
+      "width": 328,
+      "fontSize": 11
+    },
+    "amount": {
+      "x": 397,
+      "y": 5,
+      "width": 130,
+      "fontSize": 17
+    },
+    "amountInWordsLine2": {
+      "x": 15,
+      "y": 65,
+      "width": 537,
+      "fontSize": 12
+    }
+  },
+  "2": {
+    "city": {
+      "x": 50,
+      "y": 100,
+      "width": 150,
+      "fontSize": 14
+    },
+    "date": {
+      "x": 400,
+      "y": 100,
+      "width": 150,
+      "fontSize": 14
+    },
+    "payee": {
+      "x": 120,
+      "y": 180,
+      "width": 400,
+      "fontSize": 14
+    },
+    "amountInWords": {
+      "x": 120,
+      "y": 240,
+      "width": 500,
+      "fontSize": 12
+    },
+    "amount": {
+      "x": 450,
+      "y": 300,
+      "width": 150,
+      "fontSize": 18
+    }
+  },
+  "3": {
+    "city": {
+      "x": 50,
+      "y": 100,
+      "width": 150,
+      "fontSize": 14
+    },
+    "date": {
+      "x": 400,
+      "y": 100,
+      "width": 150,
+      "fontSize": 14
+    },
+    "payee": {
+      "x": 120,
+      "y": 180,
+      "width": 400,
+      "fontSize": 14
+    },
+    "amountInWords": {
+      "x": 120,
+      "y": 240,
+      "width": 500,
+      "fontSize": 12
+    },
+    "amount": {
+      "x": 450,
+      "y": 300,
+      "width": 150,
+      "fontSize": 18
+    }
+  },
+  "4": {
+    "city": {
+      "x": 50,
+      "y": 100,
+      "width": 150,
+      "fontSize": 14
+    },
+    "date": {
+      "x": 400,
+      "y": 100,
+      "width": 150,
+      "fontSize": 14
+    },
+    "payee": {
+      "x": 120,
+      "y": 180,
+      "width": 400,
+      "fontSize": 14
+    },
+    "amountInWords": {
+      "x": 120,
+      "y": 240,
+      "width": 500,
+      "fontSize": 12
+    },
+    "amount": {
+      "x": 450,
+      "y": 300,
+      "width": 150,
+      "fontSize": 18
+    }
+  }
+}
