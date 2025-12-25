@@ -105,6 +105,7 @@ export function CheckForm({ userId }: CheckFormProps) {
   }
 
   const selectedBank = banks.find((b) => b.name === bank)
+  const isBankSelected = Boolean(bank)
 
   return (
     <>
@@ -113,6 +114,37 @@ export function CheckForm({ userId }: CheckFormProps) {
           <CardContent className="pt-6">
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div className="space-y-2">
+                <Label htmlFor="bank">Banque</Label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <Select value={bank} onValueChange={setBank} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner une banque" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {banks.map((b) => (
+                          <SelectItem key={b.id} value={b.name}>
+                            {b.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    disabled={!selectedBank}
+                    asChild
+                  >
+                    <Link href={selectedBank ? `/calibrage?bank=${selectedBank.id}` : "#"}>
+                      <Settings className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="amount">Montant (DZD)</Label>
                 <Input
                   id="amount"
@@ -120,6 +152,7 @@ export function CheckForm({ userId }: CheckFormProps) {
                   placeholder="10 000.00"
                   value={amount}
                   onChange={(e) => handleAmountChange(e.target.value)}
+                  disabled={!isBankSelected}
                   required
                 />
               </div>
@@ -127,7 +160,14 @@ export function CheckForm({ userId }: CheckFormProps) {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="amountInWords">Montant en lettres</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={handleRegenerateWords} className="h-8">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRegenerateWords}
+                    className="h-8"
+                    disabled={!isBankSelected || !amount}
+                  >
                     <RefreshCcw className="mr-1 h-3 w-3" />
                     Régénérer
                   </Button>
@@ -137,6 +177,7 @@ export function CheckForm({ userId }: CheckFormProps) {
                   placeholder="dix mille dinars algériens"
                   value={amountInWords}
                   onChange={(e) => setAmountInWords(e.target.value)}
+                  disabled={!isBankSelected}
                   rows={2}
                   required
                 />
@@ -150,6 +191,7 @@ export function CheckForm({ userId }: CheckFormProps) {
                   placeholder="Nom du bénéficiaire"
                   value={payee}
                   onChange={(e) => setPayee(e.target.value)}
+                  disabled={!isBankSelected}
                   required
                 />
               </div>
@@ -157,7 +199,7 @@ export function CheckForm({ userId }: CheckFormProps) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="city">Wilaya</Label>
-                  <Select value={city} onValueChange={setCity} required>
+                  <Select value={city} onValueChange={setCity} required disabled={!isBankSelected}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner une wilaya" />
                     </SelectTrigger>
@@ -173,24 +215,15 @@ export function CheckForm({ userId }: CheckFormProps) {
 
                 <div className="space-y-2">
                   <Label htmlFor="date">Date</Label>
-                  <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                  <Input
+                    id="date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    disabled={!isBankSelected}
+                    required
+                  />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bank">Banque</Label>
-                <Select value={bank} onValueChange={setBank} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une banque" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {banks.map((b) => (
-                      <SelectItem key={b.id} value={b.name}>
-                        {b.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
@@ -201,25 +234,19 @@ export function CheckForm({ userId }: CheckFormProps) {
                   placeholder="Référence du chèque"
                   value={reference}
                   onChange={(e) => setReference(e.target.value)}
+                  disabled={!isBankSelected}
                 />
               </div>
 
-              <div className="flex gap-2">
+              <div className="pt-2">
                 <Button
                   type="button"
-                  className="flex-1"
+                  className="w-full"
                   onClick={handlePrintClick}
                   disabled={!amount || !payee || !city || !date || !bank}
                 >
                   Imprimer
                 </Button>
-                {selectedBank && (
-                  <Link href={`/calibrage?bank=${selectedBank.id}`}>
-                    <Button type="button" variant="outline" size="icon">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
               </div>
             </form>
           </CardContent>

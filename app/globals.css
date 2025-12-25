@@ -165,3 +165,16 @@
     }
   }
 }
+
+/* Cache les spin buttons natifs pour les inputs custom avec flèches internes */
+input[type="number"].spin-hide {
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="number"].spin-hide::-webkit-inner-spin-button,
+input[type="number"].spin-hide::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

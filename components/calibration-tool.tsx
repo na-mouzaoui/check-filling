@@ -32,6 +32,7 @@ export function CalibrationTool() {
     date: true,
     payee: true,
     amountInWords: true,
+    amountInWordsLine2: true,
     amount: true,
   })
   const [positions, setPositions] = useState({
@@ -173,7 +174,8 @@ export function CalibrationTool() {
     <div className="grid gap-6 lg:grid-cols-2">
       <Card className="p-6">
         <h2 className="mb-4 text-lg font-semibold">Configuration</h2>
-        <div className="space-y-4">
+        <div className="max-h-[60vh] overflow-y-auto pr-1 scrollbar-calib md:max-h-[calc(100vh-220px)]">
+          <div className="space-y-4">
           <div>
             <Label>Sélectionner une banque</Label>
             <Select
@@ -417,7 +419,19 @@ export function CalibrationTool() {
               {/* Amount in words - Line 2 (conditional) */}
               {hasSecondLine && (
                 <div className="space-y-2 rounded-lg border border-orange-300 bg-orange-50/50 p-3">
-                  <Label className="text-sm font-semibold text-orange-900">Montant en lettres - Ligne 2</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold text-orange-900">Montant en lettres - Ligne 2</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleField("amountInWordsLine2")}
+                      className="h-6 w-6 p-0"
+                    >
+                      {expandedFields.amountInWordsLine2 ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {expandedFields.amountInWordsLine2 && (
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label className="text-xs text-muted-foreground">Position X (px)</Label>
@@ -452,6 +466,7 @@ export function CalibrationTool() {
                       />
                     </div>
                   </div>
+                  )}
                 </div>
               )}
 
@@ -513,6 +528,7 @@ export function CalibrationTool() {
               </Button>
             </div>
           )}
+          </div>
         </div>
       </Card>
 
