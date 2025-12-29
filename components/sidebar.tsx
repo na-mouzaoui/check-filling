@@ -1,31 +1,51 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, FileText, History, Settings, Building2, ChevronLeft, ChevronRight } from "lucide-react"
+import { LayoutDashboard, FileText, Settings, ChevronLeft, ChevronRight, LogOut, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTheme } from "next-themes"
+import { logout } from "@/lib/auth"
+import type { User } from "@/lib/db"
+import { useEffect, useState } from "react"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Nouveau Chèque", href: "/cheque", icon: FileText },
-  { name: "Historique", href: "/historique", icon: History },
-  { name: "Gestion Banques", href: "/banques", icon: Building2 },
-  { name: "Calibrage", href: "/calibrage", icon: Settings },
+  { name: "Paramètres", href: "/calibrage", icon: Settings },
 ]
 
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
+  user: User
 }
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, user }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/login")
+    router.refresh()
+  }
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
 
   return (
     <div
       className={cn(
-        "relative flex h-full flex-col border-r bg-white transition-all duration-300",
+        "relative flex h-full flex-col border-r bg-white dark:bg-gray-900 transition-all duration-300",
         collapsed ? "w-16" : "w-64",
       )}
     >
@@ -62,6 +82,66 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           )
         })}
       </nav>
+      <div className="border-t p-4 space-y-2">
+        {!collapsed && (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground">Thème</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="h-8 w-8 p-0"
+                title={mounted && theme === "dark" ? "Mode clair" : "Mode sombre"}
+              >
+                {mounted ? (
+                  theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <div className="text-xs text-muted-foreground truncate" title={user.email}>
+              {user.email}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="w-full justify-start gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Déconnexion
+            </Button>
+          </>
+        )}
+        {collapsed && (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="w-full p-2"
+              title={mounted && theme === "dark" ? "Mode clair" : "Mode sombre"}
+            >
+              {mounted ? (
+                theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="w-full p-2"
+              title="Déconnexion"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   )
 }

@@ -58,7 +58,7 @@ export function exportToExcel(
       userMap[check.userId] || "Inconnu",
       check.bank,
       check.amount.toFixed(2),
-      check.orderOf,
+      check.payee,
       check.city,
       check.reference || "N/A",
     ]),
@@ -180,7 +180,7 @@ export function exportHistoryToPDF(checks: Check[], users: User[]) {
     userMap[check.userId] || "Inconnu",
     check.bank,
     `${check.amount.toFixed(2)} DZD`,
-    check.orderOf,
+    check.payee,
     check.city,
   ])
 

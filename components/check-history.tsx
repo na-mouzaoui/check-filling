@@ -94,7 +94,7 @@ export function CheckHistory({ checks, users }: CheckHistoryProps) {
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <CardTitle>Liste des Chèques</CardTitle>
+          <CardTitle>Historique des Chèques</CardTitle>
           <div className="flex gap-2">
             <Button onClick={() => setShowFilters(!showFilters)} variant="outline" size="sm" className="gap-2">
               <Filter className="h-4 w-4" />

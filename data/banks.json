@@ -3,6 +3,7 @@
     "id": "1",
     "code": "BNA",
     "name": "BNA - Banque Nationale d'Algérie",
+    "pdfUrl": "/uploads/BNA-1766929434775.pdf",
     "positions": {
       "city": {
         "x": 340,
@@ -144,50 +145,6 @@
         "y": 300,
         "width": 150,
         "fontSize": 18
-      }
-    }
-  },
-  {
-    "id": "5",
-    "code": "CCP",
-    "name": "CCP-Algerie Poste",
-    "pdfUrl": "/uploads/CCP-1766648701012.pdf",
-    "positions": {
-      "city": {
-        "x": 287,
-        "y": 70,
-        "width": 50,
-        "fontSize": 14
-      },
-      "date": {
-        "x": 349,
-        "y": 73,
-        "width": 57,
-        "fontSize": 9
-      },
-      "payee": {
-        "x": 93,
-        "y": 54,
-        "width": 321,
-        "fontSize": 14
-      },
-      "amountInWords": {
-        "x": 123,
-        "y": 29,
-        "width": 243,
-        "fontSize": 11
-      },
-      "amount": {
-        "x": 319,
-        "y": 5,
-        "width": 95,
-        "fontSize": 12
-      },
-      "amountInWordsLine2": {
-        "x": 46,
-        "y": 41,
-        "width": 377,
-        "fontSize": 12
       }
     }
   }

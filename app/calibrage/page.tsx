@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { LayoutWrapper } from "@/components/layout-wrapper"
-import { CalibrationTool } from "@/components/calibration-tool"
+import { ParametersPanel } from "@/components/parameters-panel"
 
 export default async function CalibragePage() {
   const user = await getCurrentUser()
@@ -14,10 +14,10 @@ export default async function CalibragePage() {
     <LayoutWrapper user={user}>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Calibrage des Chèques</h1>
-          <p className="mt-2 text-muted-foreground">Ajustez la position des champs de texte pour chaque banque</p>
+          <h1 className="text-3xl font-bold text-gray-900">Paramètres</h1>
+          <p className="mt-2 text-muted-foreground">Gérez vos banques et calibrez les modèles de chèques depuis un seul endroit</p>
         </div>
-        <CalibrationTool />
+        <ParametersPanel />
       </div>
     </LayoutWrapper>
   )

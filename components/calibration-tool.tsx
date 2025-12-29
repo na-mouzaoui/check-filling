@@ -13,13 +13,17 @@ import dynamic from "next/dynamic"
 import { CheckCanvas } from "./check-canvas"
 import { useToast } from "@/hooks/use-toast"
 
+type CalibrationToolProps = {
+  refreshKey?: number
+}
+
 // Import PDFViewer dynamically with ssr disabled
 const PDFViewer = dynamic(() => import("./pdf-viewer").then(mod => mod.PDFViewer), {
   ssr: false,
   loading: () => <div className="flex items-center justify-center p-4">Chargement...</div>
 })
 
-export function CalibrationTool() {
+export function CalibrationTool({ refreshKey }: CalibrationToolProps) {
   const { toast } = useToast()
   const [banks, setBanks] = useState<Bank[]>([])
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null)
@@ -47,7 +51,7 @@ export function CalibrationTool() {
 
   useEffect(() => {
     loadBanks()
-  }, [])
+  }, [refreshKey])
 
   useEffect(() => {
     const updateWidth = () => {

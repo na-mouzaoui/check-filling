@@ -19,6 +19,7 @@ import {
 import { Banknote, FileText, TrendingUp, Building2, Download, FileSpreadsheet } from "lucide-react"
 import type { Check, User } from "@/lib/db"
 import { exportToExcel, exportStatsToPDF } from "@/lib/export-utils"
+import { CheckHistory } from "./check-history"
 
 interface DashboardStatsProps {
   stats: {
@@ -126,103 +127,7 @@ export function DashboardStats({ stats, checks, users }: DashboardStatsProps) {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Chèques par Banque</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {bankData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={bankData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="bank" angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="#3b82f6" name="Nombre de chèques" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-[300px] items-center justify-center text-muted-foreground">
-                Aucune donnée disponible
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Répartition par Banque</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-[300px] items-center justify-center text-muted-foreground">
-                Aucune donnée disponible
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Montant Émis par Utilisateur</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {userAmountData.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Utilisateur</TableHead>
-                  <TableHead className="text-right">Montant Total (DZD)</TableHead>
-                  <TableHead className="text-right">Nombre de Chèques</TableHead>
-                  <TableHead className="text-right">Montant Moyen (DZD)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {userAmountData.map((item) => {
-                  const userId = Object.keys(stats.amountByUser).find((id) => userMap[id] === item.email)
-                  const userChecks = checks.filter((c) => c.userId === userId)
-                  const avgAmount = userChecks.length > 0 ? item.amount / userChecks.length : 0
-                  return (
-                    <TableRow key={item.email}>
-                      <TableCell className="font-medium">{item.email}</TableCell>
-                      <TableCell className="text-right">{item.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">{userChecks.length}</TableCell>
-                      <TableCell className="text-right">{avgAmount.toFixed(2)}</TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="flex h-32 items-center justify-center text-muted-foreground">
-              Aucun chèque émis pour le moment
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <CheckHistory checks={checks} users={users} />
     </div>
   )
 }

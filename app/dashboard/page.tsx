@@ -20,7 +20,7 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Tableau de Bord</h1>
-          <p className="mt-2 text-muted-foreground">Vue d'ensemble de vos chèques</p>
+          <p className="mt-2 text-muted-foreground">Vue d'ensemble et historique des chèques</p>
         </div>
         <DashboardStats stats={stats} checks={checks} users={users} />
       </div>

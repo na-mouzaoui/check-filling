@@ -10,7 +10,11 @@ import { Label } from "@/components/ui/label"
 import { Plus, Upload, Trash2, Edit } from "lucide-react"
 import type { Bank } from "@/lib/db"
 
-export function BankManagement() {
+type BankManagementProps = {
+  onChange?: () => void
+}
+
+export function BankManagement({ onChange }: BankManagementProps) {
   const [banks, setBanks] = useState<Bank[]>([])
   const [isAdding, setIsAdding] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -47,7 +51,8 @@ export function BankManagement() {
       setNewBank({ code: "", name: "" })
       setPdfFile(null)
       setIsAdding(false)
-      loadBanks()
+      await loadBanks()
+      onChange?.()
     }
   }
 
@@ -71,7 +76,8 @@ export function BankManagement() {
       setPdfFile(null)
       setIsEditing(false)
       setEditingId(null)
-      loadBanks()
+      await loadBanks()
+      onChange?.()
     }
   }
 
@@ -96,7 +102,8 @@ export function BankManagement() {
     })
 
     if (response.ok) {
-      loadBanks()
+      await loadBanks()
+      onChange?.()
     }
   }
 
