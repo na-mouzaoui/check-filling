@@ -1,0 +1,238 @@
+================================================================================
+          GUIDE DE LANCEMENT - SYSTÈME DE REMPLISSAGE DE CHÈQUES
+================================================================================
+
+PRÉREQUIS
+---------
+1. .NET 10 SDK installé
+2. Node.js (v18 ou supérieur) installé
+3. SQL Server installé et en cours d'exécution (localhost)
+4. PowerShell ou terminal de commande
+
+
+CONFIGURATION INITIALE (À FAIRE UNE SEULE FOIS)
+------------------------------------------------
+
+1. Configuration de la base de données SQL Server
+   --------------------------------------------
+   - Assurez-vous que SQL Server est démarré sur localhost
+   - La connexion par défaut utilise Windows Authentication
+   - La base de données "CheckFilling" sera créée automatiquement
+   
+   Si vous utilisez un autre serveur SQL, modifiez le fichier :
+   backend/appsettings.json
+   
+   Ligne "ConnectionStrings" > "DefaultConnection"
+   Exemple : "Server=VOTRE_SERVEUR;Database=CheckFilling;Trusted_Connection=True;TrustServerCertificate=True;"
+
+
+2. Installation des outils Entity Framework (si pas déjà fait)
+   ---------------------------------------------------------
+   Ouvrir un terminal PowerShell et exécuter :
+   
+   dotnet tool install --global dotnet-ef
+
+
+3. Créer la base de données et appliquer les migrations
+   ----------------------------------------------------
+   cd backend
+   dotnet ef database update
+   cd ..
+
+
+4. Installer les dépendances Node.js
+   ---------------------------------
+   cd frontend
+   npm install --legacy-peer-deps
+   cd ..
+
+
+================================================================================
+                         LANCEMENT DE L'APPLICATION
+================================================================================
+
+MÉTHODE 1 : LANCEMENT MANUEL (2 TERMINAUX SÉPARÉS)
+--------------------------------------------------
+
+Terminal 1 - Backend (API ASP.NET Core)
+----------------------------------------
+cd backend
+dotnet run
+
+→ L'API sera disponible sur : http://localhost:5000
+→ Attendre le message "Now listening on: http://localhost:5000"
+
+
+Terminal 2 - Frontend (Next.js)
+--------------------------------
+cd frontend
+npm run dev
+
+→ Le frontend sera disponible sur : http://localhost:3000
+→ Attendre le message "Ready in X.Xs"
+
+
+MÉTHODE 2 : LANCEMENT RAPIDE (1 SEUL TERMINAL)
+-----------------------------------------------
+Exécuter dans PowerShell :
+
+# Lancer le backend en arrière-plan
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\backend'; dotnet run"
+
+# Attendre 5 secondes que le backend démarre
+Start-Sleep -Seconds 5
+
+# Lancer le frontend
+cd frontend
+npm run dev
+
+
+================================================================================
+                              ACCÈS À L'APPLICATION
+================================================================================
+
+Frontend : http://localhost:3000
+Backend API : http://localhost:5000
+
+COMPTE DE TEST PAR DÉFAUT :
+Email : test@gmail.com
+Mot de passe : test1234
+
+
+================================================================================
+                              ARRÊT DE L'APPLICATION
+================================================================================
+
+Pour arrêter proprement les serveurs :
+
+1. Frontend : Appuyer sur Ctrl+C dans le terminal Next.js
+2. Backend : Appuyer sur Ctrl+C dans le terminal .NET
+
+OU exécuter cette commande pour tout arrêter :
+
+Get-Process | Where-Object {$_.ProcessName -eq "dotnet" -or $_.ProcessName -eq "node"} | Stop-Process -Force
+
+
+================================================================================
+                          VÉRIFICATION SQL SERVER
+================================================================================
+
+Pour vérifier que la base de données est bien créée :
+
+1. Ouvrir SQL Server Management Studio (SSMS)
+2. Se connecter à : localhost (Windows Authentication)
+3. Chercher la base "CheckFilling" dans l'explorateur d'objets
+4. Tables disponibles :
+   - Users (utilisateurs)
+   - Banks (banques)
+   - Checks (chèques imprimés - HISTORIQUE)
+   - __EFMigrationsHistory (migrations)
+
+
+OU via ligne de commande :
+
+sqlcmd -S localhost -E -C -Q "SELECT name FROM sys.databases WHERE name = 'CheckFilling'"
+
+
+================================================================================
+                              RÉSOLUTION DE PROBLÈMES
+================================================================================
+
+Problème : "Il n'existe aucun projet à exécuter"
+Solution : Assurez-vous d'être dans le bon dossier
+          cd backend (pour le backend)
+          cd frontend (pour le frontend)
+          cd .. (pour revenir à la racine)
+
+
+Problème : "Cannot connect to SQL Server"
+Solution : 
+- Vérifier que SQL Server est démarré
+- Vérifier la chaîne de connexion dans backend/appsettings.json
+- Tester la connexion : sqlcmd -S localhost -E -C -Q "SELECT @@VERSION"
+
+
+Problème : Port 3000 ou 5000 déjà utilisé
+Solution : Arrêter les processus existants avec la commande Stop-Process ci-dessus
+
+
+Problème : Les chèques n'apparaissent pas dans l'historique
+Solution : 
+1. Vérifier que vous êtes connecté (cookie JWT valide)
+2. Vérifier que l'API backend est démarrée
+3. Vérifier dans SSMS que la table Checks contient des données
+4. Vérifier la console du navigateur pour les erreurs (F12)
+
+
+Problème : Erreurs de compilation TypeScript
+Solution : 
+- Supprimer node_modules et .next
+- Réinstaller : npm install --legacy-peer-deps
+- Relancer : npm run dev
+
+
+================================================================================
+                              STRUCTURE DU PROJET
+================================================================================
+
+check-filling/
+├── frontend/                 # Application Next.js (React)
+│   ├── app/                  # Pages Next.js
+│   │   ├── dashboard/        # Tableau de bord
+│   │   ├── cheque/           # Création de chèques
+│   │   ├── calibrage/        # Calibrage des positions
+│   │   └── login/            # Connexion
+│   ├── components/           # Composants React
+│   ├── lib/                  # Utilitaires et helpers
+│   ├── .env.local            # Variables d'environnement Next.js
+│   └── package.json          # Dépendances Node.js
+│
+└── backend/                  # API ASP.NET Core
+    ├── Controllers/          # Endpoints API
+    ├── Services/             # Logique métier
+    ├── Models/               # Modèles de données
+    ├── Data/                 # DbContext et migrations
+    ├── Migrations/           # Migrations EF Core
+    └── appsettings.json      # Configuration (connection string)
+
+
+================================================================================
+                         COMMANDES UTILES SUPPLÉMENTAIRES
+================================================================================
+
+# Voir les logs du backend en temps réel
+cd backend
+dotnet run --verbosity detailed
+
+# Créer une nouvelle migration après modification du modèle
+cd backend
+dotnet ef migrations add NomDeLaMigration
+dotnet ef database update
+
+# Réinitialiser complètement la base de données
+sqlcmd -S localhost -E -C -Q "DROP DATABASE CheckFilling"
+cd backend
+dotnet ef database update
+
+# Build production Next.js
+cd frontend
+npm run build
+npm start
+
+# Build production ASP.NET
+cd backend
+dotnet publish -c Release
+
+
+================================================================================
+                              INFORMATIONS DE CONTACT
+================================================================================
+
+Pour toute question ou problème, consulter :
+- README.md (racine du projet)
+- frontend/README.md (documentation frontend)
+- backend/README.md (documentation API)
+
+
+Dernière mise à jour : 31 décembre 2025
+================================================================================

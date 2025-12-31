@@ -1,0 +1,597 @@
+================================================================================
+          DOCUMENTATION BACKEND - SYSTÈME DE REMPLISSAGE DE CHÈQUES
+================================================================================
+
+STRUCTURE GÉNÉRALE
+------------------
+backend/
+├── Controllers/          # Contrôleurs API (endpoints REST)
+├── Services/             # Logique métier et traitement des données
+├── Models/               # Modèles de données (entités)
+├── Data/                 # Contexte de base de données
+├── Migrations/           # Migrations Entity Framework
+├── wwwroot/              # Fichiers statiques (PDFs uploadés)
+├── bin/                  # Binaires compilés (généré automatiquement)
+├── obj/                  # Fichiers objets de compilation (généré)
+├── Program.cs            # Point d'entrée de l'application
+├── appsettings.json      # Configuration de l'application
+├── CheckFillingAPI.csproj # Fichier de projet .NET
+└── README.md             # Documentation du projet
+
+
+================================================================================
+                              FICHIERS PRINCIPAUX
+================================================================================
+
+📄 Program.cs
+-------------
+RÔLE : Point d'entrée principal de l'API ASP.NET Core
+CONTENU :
+  - Configuration des services (DbContext, Authentication, CORS)
+  - Configuration JWT pour l'authentification
+  - Configuration de la base de données SQL Server
+  - Middleware pipeline (CORS, Authentication, Authorization)
+  - Initialisation de la base de données au démarrage
+
+SERVICES CONFIGURÉS :
+  ✓ Entity Framework Core avec SQL Server
+  ✓ JWT Bearer Authentication (lecture depuis cookie HttpOnly)
+  ✓ CORS pour localhost:3000 et localhost:3001
+  ✓ Contrôleurs API
+  ✓ Services métier (AuthService, BankService, CheckService)
+
+
+📄 appsettings.json
+-------------------
+RÔLE : Fichier de configuration de l'application
+CONTENU :
+  - ConnectionStrings : Chaîne de connexion SQL Server
+    * DefaultConnection : "Server=localhost;Database=CheckFilling;..."
+  - Jwt : Configuration du token JWT
+    * Key : Clé secrète pour signer les tokens
+    * Issuer : Émetteur du token
+    * Audience : Audience du token
+  - Logging : Configuration des logs
+
+
+📄 CheckFillingAPI.csproj
+--------------------------
+RÔLE : Fichier de projet .NET définissant les dépendances
+PACKAGES :
+  - Microsoft.EntityFrameworkCore (10.0.1)
+  - Microsoft.EntityFrameworkCore.SqlServer (10.0.1)
+  - Microsoft.EntityFrameworkCore.Design (10.0.1)
+  - Microsoft.AspNetCore.Authentication.JwtBearer (10.0.0)
+  - BCrypt.Net-Next (4.0.3) - Hash des mots de passe
+
+
+================================================================================
+                              DOSSIER: Controllers/
+================================================================================
+
+Les contrôleurs exposent les endpoints de l'API REST. Tous utilisent l'attribut
+[ApiController] et [Route("api/[controller]")] pour définir les routes.
+
+
+📄 AuthController.cs
+--------------------
+ROUTE BASE : /api/auth
+RÔLE : Gestion de l'authentification des utilisateurs
+
+ENDPOINTS :
+  POST /api/auth/register
+    - Inscription d'un nouvel utilisateur
+    - Paramètres : { email, password }
+    - Hash le mot de passe avec BCrypt
+    - Retourne : utilisateur créé (sans le hash du mot de passe)
+
+  POST /api/auth/login
+    - Connexion d'un utilisateur existant
+    - Paramètres : { email, password }
+    - Vérifie le mot de passe avec BCrypt
+    - Génère un token JWT
+    - Stocke le JWT dans un cookie HttpOnly sécurisé
+    - Retourne : { token, user }
+
+  POST /api/auth/logout
+    - Déconnexion de l'utilisateur
+    - Supprime le cookie JWT
+    - Retourne : message de succès
+
+SÉCURITÉ :
+  ✓ Mots de passe hashés avec BCrypt (coût 11)
+  ✓ JWT stocké dans cookie HttpOnly (protection XSS)
+  ✓ Cookie avec SameSite=Lax et Secure=false (dev local)
+
+
+📄 BanksController.cs
+---------------------
+ROUTE BASE : /api/banks
+RÔLE : Gestion des banques et leurs modèles de chèques
+AUTHENTIFICATION : Requise sur tous les endpoints ([Authorize])
+
+ENDPOINTS :
+  GET /api/banks
+    - Liste toutes les banques
+    - Retourne : tableau de banques avec leurs positions
+
+  GET /api/banks/{id}
+    - Détails d'une banque spécifique
+    - Retourne : banque avec positions désérialisées
+
+  POST /api/banks
+    - Création d'une nouvelle banque
+    - Paramètres : { code, name, pdfFile? }
+    - Upload optionnel d'un PDF de modèle de chèque
+    - Sauvegarde le PDF dans wwwroot/uploads/
+    - Retourne : banque créée
+
+  PUT /api/banks/{id}
+    - Mise à jour d'une banque existante
+    - Peut mettre à jour : name, code, positions, PDF
+    - Retourne : banque mise à jour
+
+  DELETE /api/banks/{id}
+    - Suppression d'une banque
+    - Supprime aussi le fichier PDF associé
+    - Retourne : 204 No Content
+
+FONCTIONNALITÉS :
+  ✓ Upload de fichiers PDF (modèles de chèques)
+  ✓ Stockage des positions de champs en JSON
+  ✓ Gestion des fichiers statiques
+
+
+📄 ChecksController.cs
+----------------------
+ROUTE BASE : /api/checks
+RÔLE : Gestion de l'historique des chèques imprimés
+AUTHENTIFICATION : Requise sur tous les endpoints ([Authorize])
+
+ENDPOINTS :
+  GET /api/checks
+    - Liste tous les chèques de l'utilisateur connecté
+    - Filtre automatique par userId du JWT
+    - Retourne : tableau de DTOs (sans navigation circulaire)
+
+  GET /api/checks/stats
+    - Statistiques pour le dashboard
+    - Total des chèques de l'utilisateur
+    - Retourne : { totalChecks, ... }
+
+  GET /api/checks/{id}
+    - Détails d'un chèque spécifique
+    - Vérifie l'appartenance à l'utilisateur connecté
+    - Retourne : DTO du chèque
+
+  POST /api/checks
+    - Enregistrement d'un nouveau chèque imprimé
+    - Paramètres : { amount, amountInWords, payee, city, date, reference, bank }
+    - UserId extrait automatiquement du JWT
+    - Retourne : DTO du chèque créé
+
+  PUT /api/checks/{id}
+    - Mise à jour d'un chèque (non implémenté actuellement)
+
+  DELETE /api/checks/{id}
+    - Suppression d'un chèque de l'historique
+    - Retourne : 204 No Content
+
+SÉCURITÉ :
+  ✓ Filtrage automatique par utilisateur (userId du JWT)
+  ✓ Vérification de propriété avant modification/suppression
+  ✓ DTOs pour éviter les références circulaires JSON
+
+
+📄 UsersController.cs
+---------------------
+ROUTE BASE : /api/users
+RÔLE : Gestion des utilisateurs (admin/stats)
+AUTHENTIFICATION : Requise ([Authorize])
+
+ENDPOINTS :
+  GET /api/users
+    - Liste de tous les utilisateurs (pour dashboard/stats)
+    - Retourne : tableau de { id, email, createdAt }
+    - Note : Exclut les mots de passe hashés
+
+
+================================================================================
+                              DOSSIER: Services/
+================================================================================
+
+Les services contiennent la logique métier. Ils sont injectés dans les
+contrôleurs via Dependency Injection.
+
+
+📄 IServices.cs
+---------------
+RÔLE : Interfaces des services (contrats)
+
+INTERFACES DÉFINIES :
+
+  IAuthService
+    - Task<User?> Register(string email, string password)
+    - Task<User?> Login(string email, string password)
+    - string GenerateJwtToken(User user)
+
+  IBankService
+    - Task<IEnumerable<Bank>> GetAllBanks()
+    - Task<Bank?> GetBankById(int id)
+    - Task<Bank> CreateBank(Bank bank)
+    - Task<Bank?> UpdateBank(int id, Bank bank)
+    - Task<bool> DeleteBank(int id)
+
+  ICheckService
+    - Task<IEnumerable<Check>> GetChecksByUserId(int userId)
+    - Task<Check?> GetCheckById(int id, int userId)
+    - Task<Check> CreateCheck(Check check)
+    - Task<bool> DeleteCheck(int id, int userId)
+
+
+📄 AuthService.cs
+-----------------
+RÔLE : Implémentation de la logique d'authentification
+
+MÉTHODES :
+
+  Register(email, password)
+    - Vérifie si l'email existe déjà
+    - Hash le mot de passe avec BCrypt (WorkFactor: 11)
+    - Crée l'utilisateur en base
+    - Retourne l'utilisateur créé
+
+  Login(email, password)
+    - Recherche l'utilisateur par email
+    - Vérifie le mot de passe avec BCrypt.Verify
+    - Retourne l'utilisateur si valide, null sinon
+
+  GenerateJwtToken(user)
+    - Crée un token JWT avec les claims:
+      * userId : ID de l'utilisateur
+      * email : Email de l'utilisateur
+    - Durée de validité : 24 heures
+    - Signé avec la clé secrète du appsettings.json
+    - Retourne le token JWT
+
+DÉPENDANCES :
+  - AppDbContext : Accès à la base de données
+  - IConfiguration : Lecture de la clé JWT
+
+
+📄 BankService.cs
+-----------------
+RÔLE : Gestion des opérations CRUD sur les banques
+
+MÉTHODES :
+
+  GetAllBanks()
+    - Récupère toutes les banques
+    - Retourne la liste complète
+
+  GetBankById(id)
+    - Recherche une banque par ID
+    - Retourne la banque ou null
+
+  CreateBank(bank)
+    - Ajoute une nouvelle banque
+    - Sauvegarde en base
+    - Retourne la banque créée
+
+  UpdateBank(id, bank)
+    - Mise à jour des propriétés d'une banque
+    - Retourne la banque mise à jour ou null
+
+  DeleteBank(id)
+    - Supprime une banque de la base
+    - Retourne true si succès, false sinon
+
+DÉPENDANCES :
+  - AppDbContext : Accès à la base de données
+
+
+📄 CheckService.cs
+------------------
+RÔLE : Gestion de l'historique des chèques imprimés
+
+MÉTHODES :
+
+  GetChecksByUserId(userId)
+    - Récupère tous les chèques d'un utilisateur
+    - Tri par date de création (plus récent en premier)
+    - Inclut les données de l'utilisateur (navigation)
+    - Retourne la liste des chèques
+
+  GetCheckById(id, userId)
+    - Recherche un chèque par ID
+    - Vérifie qu'il appartient à l'utilisateur
+    - Inclut les données de l'utilisateur
+    - Retourne le chèque ou null
+
+  CreateCheck(check)
+    - Enregistre un nouveau chèque imprimé
+    - Sauvegarde en base avec timestamp
+    - Retourne le chèque créé
+
+  DeleteCheck(id, userId)
+    - Supprime un chèque de l'historique
+    - Vérifie l'appartenance à l'utilisateur
+    - Retourne true si succès, false sinon
+
+DÉPENDANCES :
+  - AppDbContext : Accès à la base de données
+
+
+================================================================================
+                              DOSSIER: Models/
+================================================================================
+
+📄 Models.cs
+------------
+RÔLE : Définition des entités de la base de données
+
+CLASSES :
+
+  User (Utilisateur)
+    - Id : int (clé primaire)
+    - Email : string (unique)
+    - PasswordHash : string (hash BCrypt)
+    - CreatedAt : DateTime (date de création)
+    - Checks : ICollection<Check> (navigation vers les chèques)
+
+  Check (Chèque imprimé)
+    - Id : int (clé primaire)
+    - UserId : int (clé étrangère vers User)
+    - Amount : decimal (montant numérique)
+    - AmountInWords : string (montant en lettres)
+    - Payee : string (bénéficiaire)
+    - City : string (ville)
+    - Date : string (date du chèque)
+    - Reference : string (référence optionnelle)
+    - Bank : string (nom de la banque)
+    - CreatedAt : DateTime (date d'enregistrement)
+    - User : User (navigation vers l'utilisateur)
+
+  Bank (Banque)
+    - Id : int (clé primaire)
+    - Code : string (code unique de la banque)
+    - Name : string (nom complet)
+    - PdfUrl : string? (chemin vers le PDF modèle, nullable)
+    - PositionsJson : string (positions des champs en JSON)
+    - CreatedAt : DateTime (date de création)
+
+  BankPositions (Positions des champs sur le chèque)
+    - City : FieldPosition (position du champ ville)
+    - Date : FieldPosition (position de la date)
+    - Payee : FieldPosition (position du bénéficiaire)
+    - AmountInWords : FieldPosition (montant en lettres ligne 1)
+    - AmountInWordsLine2 : FieldPosition? (ligne 2, optionnel)
+    - Amount : FieldPosition (montant numérique)
+
+  FieldPosition (Position d'un champ)
+    - X : int (position horizontale en pixels)
+    - Y : int (position verticale en pixels)
+    - Width : int (largeur du champ)
+    - FontSize : int (taille de police)
+
+RELATIONS :
+  - User 1 → N Check (un utilisateur a plusieurs chèques)
+  - Bank n'a pas de relation avec Check (stockage du nom uniquement)
+
+
+================================================================================
+                              DOSSIER: Data/
+================================================================================
+
+📄 AppDbContext.cs
+------------------
+RÔLE : Contexte Entity Framework Core - Interface avec la base de données
+
+RESPONSABILITÉS :
+  - Définit les DbSet (tables) : Users, Checks, Banks
+  - Configure les relations entre entités
+  - Définit les index de base de données
+  - Configure le seeding (données initiales)
+
+CONFIGURATION DES ENTITÉS :
+
+  User :
+    - Email unique (index)
+    - PasswordHash requis
+    - Relation 1-N vers Checks (cascade delete)
+
+  Check :
+    - UserId requis (clé étrangère)
+    - Index sur UserId pour performance
+    - Relation N-1 vers User
+
+  Bank :
+    - Code unique (index)
+    - Name requis
+    - PositionsJson avec valeur par défaut "{}"
+
+DONNÉES DE SEED (initiales) :
+  ✓ 1 utilisateur test :
+    - Email: test@gmail.com
+    - Mot de passe: test1234 (hash BCrypt statique)
+    - Créé le: 2025-01-01
+
+  ✓ 3 banques algériennes :
+    - BNA (Banque Nationale d'Algérie) - Code: BNA
+    - CPA (Crédit Populaire d'Algérie) - Code: CPA  
+    - BEA (Banque Extérieure d'Algérie) - Code: BEA
+
+Note : Le seed utilise des valeurs déterministes (date et hash fixes)
+       pour permettre des migrations reproductibles.
+
+
+================================================================================
+                              DOSSIER: Migrations/
+================================================================================
+
+RÔLE : Historique des modifications de schéma de base de données
+
+FICHIERS GÉNÉRÉS AUTOMATIQUEMENT :
+  - *_InitialCreate.cs : Migration initiale (création des tables)
+  - *.Designer.cs : Métadonnées du modèle
+  - AppDbContextModelSnapshot.cs : Snapshot actuel du modèle
+
+COMMANDES UTILES :
+  Créer une migration :
+    dotnet ef migrations add NomDeLaMigration
+
+  Appliquer les migrations :
+    dotnet ef database update
+
+  Annuler la dernière migration :
+    dotnet ef migrations remove
+
+  Réinitialiser la base :
+    DROP DATABASE CheckFilling
+    dotnet ef database update
+
+
+================================================================================
+                              DOSSIER: wwwroot/
+================================================================================
+
+RÔLE : Fichiers statiques accessibles via HTTP
+
+STRUCTURE :
+  wwwroot/
+  └── uploads/
+      └── [fichiers PDF des modèles de chèques]
+
+USAGE :
+  - Les PDFs uploadés pour les banques sont stockés ici
+  - Accessibles via : http://localhost:5000/uploads/nom_fichier.pdf
+  - Configuration dans Program.cs : app.UseStaticFiles()
+
+SÉCURITÉ :
+  - Pas de listage de répertoire activé
+  - Seuls les fichiers explicitement uploadés sont accessibles
+
+
+================================================================================
+                                   SÉCURITÉ
+================================================================================
+
+AUTHENTIFICATION :
+  ✓ JWT Bearer Token
+  ✓ Token stocké dans cookie HttpOnly (protection XSS)
+  ✓ Durée de vie : 24 heures
+  ✓ Lecture du token depuis cookie ET header Authorization
+
+MOTS DE PASSE :
+  ✓ Hash avec BCrypt
+  ✓ Work Factor : 11 (2^11 itérations)
+  ✓ Salt unique par mot de passe (automatique avec BCrypt)
+
+CORS :
+  ✓ Activé pour localhost:3000 et localhost:3001
+  ✓ Credentials autorisés (cookies)
+  ✓ Tous les headers et méthodes autorisés
+
+BASE DE DONNÉES :
+  ✓ SQL Server avec Windows Authentication
+  ✓ TrustServerCertificate=True (dev local)
+  ✓ Paramètres paramétrés (protection injection SQL via EF Core)
+
+AUTORISATIONS :
+  ✓ [Authorize] sur les endpoints protégés
+  ✓ Filtrage automatique par userId (extraction du JWT)
+  ✓ Vérification de propriété avant modification/suppression
+
+
+================================================================================
+                              FLUX DE DONNÉES
+================================================================================
+
+1. INSCRIPTION/CONNEXION :
+   Frontend → POST /api/auth/register ou /login
+   → AuthController → AuthService
+   → Vérification/Hash BCrypt → DbContext → SQL Server
+   → Génération JWT → Cookie HttpOnly → Frontend
+
+2. GESTION DES BANQUES :
+   Frontend (auth) → /api/banks (GET/POST/PUT/DELETE)
+   → BanksController (vérifie JWT) → BankService
+   → DbContext → SQL Server
+   → Retour JSON → Frontend
+
+3. ENREGISTREMENT D'UN CHÈQUE :
+   Frontend (après impression) → POST /api/checks
+   → ChecksController (extrait userId du JWT) → CheckService
+   → DbContext → SQL Server (table Checks)
+   → Retour DTO → Frontend (historique)
+
+4. CONSULTATION HISTORIQUE :
+   Frontend → GET /api/checks
+   → ChecksController (filtre par userId) → CheckService
+   → DbContext → SQL Server → Retour DTOs → Frontend
+
+
+================================================================================
+                           TECHNOLOGIES UTILISÉES
+================================================================================
+
+✓ .NET 10.0 (dernière version LTS)
+✓ ASP.NET Core 10.0 (framework web)
+✓ Entity Framework Core 10.0.1 (ORM)
+✓ SQL Server (base de données)
+✓ BCrypt.Net-Next 4.0.3 (hash de mots de passe)
+✓ JWT Bearer Authentication (authentification stateless)
+
+
+================================================================================
+                              POINTS D'ATTENTION
+================================================================================
+
+⚠️ CONFIGURATION REQUISE :
+  - SQL Server doit être installé et démarré sur localhost
+  - La base de données "CheckFilling" est créée automatiquement
+  - La clé JWT doit être présente dans appsettings.json
+
+⚠️ DÉVELOPPEMENT :
+  - Port par défaut : 5000
+  - HTTPS désactivé en dev (RequireHttpsMetadata = false)
+  - Cookie Secure = false (développement local)
+
+⚠️ PRODUCTION :
+  - Activer HTTPS
+  - Mettre Secure = true sur les cookies
+  - Changer la clé JWT
+  - Configurer un serveur SQL distant si nécessaire
+  - Activer les logs appropriés
+
+
+================================================================================
+                           COMMANDES UTILES
+================================================================================
+
+Lancer l'API :
+  cd backend
+  dotnet run
+
+Build de production :
+  dotnet publish -c Release
+
+Créer une migration :
+  dotnet ef migrations add NomMigration
+
+Appliquer les migrations :
+  dotnet ef database update
+
+Lister les migrations :
+  dotnet ef migrations list
+
+Restaurer les packages :
+  dotnet restore
+
+Tests (si implémentés) :
+  dotnet test
+
+
+================================================================================
+Dernière mise à jour : 31 décembre 2025
+================================================================================

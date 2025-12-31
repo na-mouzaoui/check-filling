@@ -1,0 +1,50 @@
+[
+  {
+    "userId": "1",
+    "amount": 300000,
+    "amountInWords": "trois cents mille dinars algériens et zéro centimes",
+    "payee": "moi meme",
+    "city": "Alger",
+    "date": "2025-12-29",
+    "reference": "test001",
+    "bank": "BNA - Banque Nationale d'Algérie",
+    "id": "1766999192538-2auvymd0j",
+    "createdAt": "2025-12-29T09:06:32.538Z"
+  },
+  {
+    "userId": "1",
+    "amount": 55600.54,
+    "amountInWords": "cinquante-cinq mille six cents dinars algériens et cinquante-quatre centimes",
+    "payee": "PDG",
+    "city": "Alger",
+    "date": "2025-12-29",
+    "reference": "REf220",
+    "bank": "BNA - Banque Nationale d'Algérie",
+    "id": "1766999244854-da6wphelv",
+    "createdAt": "2025-12-29T09:07:24.854Z"
+  },
+  {
+    "userId": "1",
+    "amount": 200,
+    "amountInWords": "deux cents dinars algériens et zéro centimes",
+    "payee": "hk",
+    "city": "Alger",
+    "date": "2025-12-29",
+    "reference": "yu",
+    "bank": "BNA - Banque Nationale d'Algérie",
+    "id": "1767004846487-vw5j1v78p",
+    "createdAt": "2025-12-29T10:40:46.487Z"
+  },
+  {
+    "userId": "1",
+    "amount": 2001.32,
+    "amountInWords": "deux mille un dinars algériens et trente-deux centimes",
+    "payee": "DFC",
+    "city": "Alger",
+    "date": "2025-12-30",
+    "reference": "TestImprimente",
+    "bank": "BNA - Banque Nationale d'Algérie",
+    "id": "1767082497510-la9xbtn9z",
+    "createdAt": "2025-12-30T08:14:57.511Z"
+  }
+]
