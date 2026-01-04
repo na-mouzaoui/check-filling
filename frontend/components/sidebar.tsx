@@ -8,6 +8,7 @@ import { LayoutDashboard, FileText, Settings, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { logout } from "@/lib/auth-client"
 import type { User } from "@/lib/db"
+import UserProfileMenu from "./user-profile-menu"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -83,15 +84,18 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="text-xs text-gray-600 truncate" title={user.email}>
           {user.email}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLogout}
-          className="w-full justify-start gap-2"
-        >
-          <LogOut className="h-4 w-4" style={{ color: '#e82c2a' }} />
-          Déconnexion
-        </Button>
+        <div className="flex items-center gap-2">
+          <UserProfileMenu />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="flex-1 justify-start gap-2"
+          >
+            <LogOut className="h-4 w-4" style={{ color: '#e82c2a' }} />
+            Déconnexion
+          </Button>
+        </div>
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ using CheckFillingAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace CheckFillingAPI.Controllers;
 
@@ -12,10 +13,12 @@ namespace CheckFillingAPI.Controllers;
 public class BanksController : ControllerBase
 {
     private readonly IBankService _bankService;
+    private readonly IAuditService _auditService;
 
-    public BanksController(IBankService bankService)
+    public BanksController(IBankService bankService, IAuditService auditService)
     {
         _bankService = bankService;
+        _auditService = auditService;
     }
 
     [HttpGet]
@@ -39,6 +42,8 @@ public class BanksController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] BankCreateRequest request)
     {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
         var bank = new Bank
         {
             Code = request.Code,
@@ -47,6 +52,15 @@ public class BanksController : ControllerBase
         };
 
         var createdBank = await _bankService.CreateBankAsync(bank, request.Pdf);
+
+        // Log the action
+        await _auditService.LogAction(userId, "CREATE_BANK", "Bank", createdBank.Id, new
+        {
+            code = createdBank.Code,
+            name = createdBank.Name,
+            pdfUrl = createdBank.PdfUrl
+        });
+
         return CreatedAtAction(nameof(GetById), new { id = createdBank.Id }, createdBank);
     }
 
@@ -54,6 +68,15 @@ public class BanksController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromForm] BankUpdateRequest request)
     {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        
+        // Get old bank for audit log
+        var oldBank = await _bankService.GetBankByIdAsync(id);
+        if (oldBank == null)
+        {
+            return NotFound(new { message = "Banque non trouvée" });
+        }
+
         var bank = new Bank
         {
             Code = request.Code ?? "",
@@ -67,17 +90,41 @@ public class BanksController : ControllerBase
             return NotFound(new { message = "Banque non trouvée" });
         }
 
+        // Log the action
+        await _auditService.LogAction(userId, "UPDATE_BANK", "Bank", id, new
+        {
+            oldValues = new { code = oldBank.Code, name = oldBank.Name },
+            newValues = new { code = updatedBank.Code, name = updatedBank.Name }
+        });
+
         return Ok(updatedBank);
     }
 
     [HttpPatch("{id}/positions")]
     public async Task<IActionResult> UpdatePositions(int id, [FromBody] BankPositions positions)
     {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        
+        // Get old bank for audit log
+        var oldBank = await _bankService.GetBankByIdAsync(id);
+        if (oldBank == null)
+        {
+            return NotFound(new { message = "Banque non trouvée" });
+        }
+
         var bank = await _bankService.UpdateBankPositionsAsync(id, positions);
         if (bank == null)
         {
             return NotFound(new { message = "Banque non trouvée" });
         }
+
+        // Log the action
+        await _auditService.LogAction(userId, "UPDATE_CALIBRATION", "Bank", id, new
+        {
+            bankName = bank.Name,
+            oldPositions = oldBank.PositionsJson,
+            newPositions = bank.PositionsJson
+        });
 
         return Ok(bank);
     }
@@ -85,11 +132,27 @@ public class BanksController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        
+        // Get bank details for audit log
+        var bank = await _bankService.GetBankByIdAsync(id);
+        if (bank == null)
+        {
+            return NotFound(new { message = "Banque non trouvée" });
+        }
+
         var success = await _bankService.DeleteBankAsync(id);
         if (!success)
         {
             return NotFound(new { message = "Banque non trouvée" });
         }
+
+        // Log the action
+        await _auditService.LogAction(userId, "DELETE_BANK", "Bank", id, new
+        {
+            code = bank.Code,
+            name = bank.Name
+        });
 
         return NoContent();
     }

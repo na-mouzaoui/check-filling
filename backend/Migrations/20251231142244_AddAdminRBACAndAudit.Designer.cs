@@ -4,6 +4,7 @@ using CheckFillingAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CheckFillingAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251231142244_AddAdminRBACAndAudit")]
+    partial class AddAdminRBACAndAudit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -291,7 +294,7 @@ namespace CheckFillingAPI.Migrations
                             LastName = "User",
                             PasswordHash = "$2a$11$3f1y0aSd2iVFhKoWi60oVuwBiNQb913o5x94e0pYXB9eaqvHXW1By",
                             PhoneNumber = "0661000000",
-                            Role = "admin"
+                            Role = "comptabilite"
                         },
                         new
                         {
@@ -300,21 +303,9 @@ namespace CheckFillingAPI.Migrations
                             Direction = "Administration",
                             Email = "admin@test.com",
                             FirstName = "Admin",
-                            LastName = "Test",
-                            PasswordHash = "$2a$11$3f1y0aSd2iVFhKoWi60oVuwBiNQb913o5x94e0pYXB9eaqvHXW1By",
+                            LastName = "System",
+                            PasswordHash = "$2a$11$vYZ8QZ5X7FqK9X8yN0YxFO3p7X5Z8qY9Z0x1Y2z3A4b5C6d7E8f9g",
                             PhoneNumber = "0661999999",
-                            Role = "admin"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Direction = "Administration",
-                            Email = "admin@gmail.com",
-                            FirstName = "Admin",
-                            LastName = "Gmail",
-                            PasswordHash = "$2a$11$3f1y0aSd2iVFhKoWi60oVuwBiNQb913o5x94e0pYXB9eaqvHXW1By",
-                            PhoneNumber = "0661999998",
                             Role = "admin"
                         });
                 });

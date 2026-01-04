@@ -55,13 +55,23 @@ public class AuthService : IAuthService
     public string GenerateJwtToken(User user)
     {
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+        
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim("role", user.Role ?? "comptabilite")
+        };
+
+        // Add region claim for regionale users
+        if (user.Role == "regionale" && !string.IsNullOrEmpty(user.Region))
+        {
+            claims.Add(new Claim("region", user.Region));
+        }
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
-            }),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddDays(7),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
@@ -71,5 +81,23 @@ public class AuthService : IAuthService
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    public async Task<User?> GetUserByIdAsync(int userId)
+    {
+        return await _context.Users.FindAsync(userId);
+    }
+
+    public async Task<bool> ChangePasswordAsync(int userId, string newPassword)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

@@ -5,6 +5,9 @@ export interface User {
   firstName: string
   lastName: string
   phoneNumber: string
+  role: string
+  direction: string
+  region?: string
   createdAt: string
 }
 

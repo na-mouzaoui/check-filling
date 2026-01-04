@@ -41,7 +41,10 @@ const createCheck = async (data: {
   const response = await requestWithAuth(`${API_BASE}/api/checks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      wilaya: data.city, // Send city as wilaya
+    }),
     cache: "no-store",
   })
 
@@ -160,7 +163,7 @@ function PrintCheckCanvas({ positions, values }: {
 }
 
 interface CheckFormProps {
-  userId: string
+  userId: string | number
 }
 
 export function CheckForm({ userId }: CheckFormProps) {

@@ -43,17 +43,17 @@ export function DashboardStats({ stats, checks, users }: DashboardStatsProps) {
     {} as Record<string, string>,
   )
 
-  const bankData = Object.entries(stats.checksByBank).map(([bank, count]) => ({
+  const bankData = Object.entries(stats.checksByBank || {}).map(([bank, count]) => ({
     bank,
     count,
   }))
 
-  const userAmountData = Object.entries(stats.amountByUser).map(([userId, amount]) => ({
+  const userAmountData = Object.entries(stats.amountByUser || {}).map(([userId, amount]) => ({
     email: userMap[userId] || "Inconnu",
     amount,
   }))
 
-  const pieData = Object.entries(stats.checksByBank).map(([name, value]) => ({
+  const pieData = Object.entries(stats.checksByBank || {}).map(([name, value]) => ({
     name,
     value,
   }))
@@ -86,7 +86,7 @@ export function DashboardStats({ stats, checks, users }: DashboardStatsProps) {
             <Banknote className="h-4 w-4" style={{ color: '#e82c2a' }} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalAmount.toFixed(2)} DZD</div>
+            <div className="text-2xl font-bold">{(stats.totalAmount || 0).toFixed(2)} DZD</div>
             <p className="text-xs text-muted-foreground">Somme de tous les chèques</p>
           </CardContent>
         </Card>
@@ -97,7 +97,7 @@ export function DashboardStats({ stats, checks, users }: DashboardStatsProps) {
             <FileText className="h-4 w-4" style={{ color: '#e82c2a' }} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalChecks}</div>
+            <div className="text-2xl font-bold">{stats.totalChecks || 0}</div>
             <p className="text-xs text-muted-foreground">Chèques émis au total</p>
           </CardContent>
         </Card>
@@ -109,7 +109,7 @@ export function DashboardStats({ stats, checks, users }: DashboardStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.totalChecks > 0 ? (stats.totalAmount / stats.totalChecks).toFixed(2) : "0.00"} DZD
+              {stats.totalChecks > 0 ? ((stats.totalAmount || 0) / stats.totalChecks).toFixed(2) : "0.00"} DZD
             </div>
             <p className="text-xs text-muted-foreground">Par chèque</p>
           </CardContent>
@@ -121,7 +121,7 @@ export function DashboardStats({ stats, checks, users }: DashboardStatsProps) {
             <Building2 className="h-4 w-4" style={{ color: '#e82c2a' }} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Object.keys(stats.checksByBank).length}</div>
+            <div className="text-2xl font-bold">{Object.keys(stats.checksByBank || {}).length}</div>
             <p className="text-xs text-muted-foreground">Banques différentes</p>
           </CardContent>
         </Card>

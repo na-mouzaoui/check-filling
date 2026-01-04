@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CheckFillingAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+47b800a3b8007fc99c90fe648e5104699dfa4e53")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cce7e688c86cabb82d408f0c5f6013fcbf932cf8")]
 [assembly: System.Reflection.AssemblyProductAttribute("CheckFillingAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CheckFillingAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

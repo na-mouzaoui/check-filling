@@ -73,6 +73,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddScoped<ICheckService, CheckService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 var app = builder.Build();
 

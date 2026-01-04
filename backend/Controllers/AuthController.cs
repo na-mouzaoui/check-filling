@@ -43,6 +43,12 @@ public class AuthController : ControllerBase
             {
                 id = user!.Id,
                 email = user.Email,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                direction = user.Direction,
+                phoneNumber = user.PhoneNumber,
+                role = user.Role,
+                region = user.Region,
                 createdAt = user.CreatedAt
             }
         });
@@ -82,12 +88,17 @@ public class AuthController : ControllerBase
 
     [Authorize]
     [HttpGet("me")]
-    public IActionResult Me()
+    public async Task<IActionResult> Me()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var email = User.FindFirstValue(ClaimTypes.Email);
 
-        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _authService.GetUserByIdAsync(int.Parse(userId));
+        if (user == null)
         {
             return Unauthorized();
         }
@@ -96,8 +107,15 @@ public class AuthController : ControllerBase
         {
             user = new
             {
-                id = userId,
-                email,
+                id = user.Id,
+                email = user.Email,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                direction = user.Direction,
+                phoneNumber = user.PhoneNumber,
+                role = user.Role,
+                region = user.Region,
+                createdAt = user.CreatedAt
             }
         });
     }
@@ -108,7 +126,40 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete("jwt");
         return Ok(new { success = true });
     }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _authService.GetUserByIdAsync(int.Parse(userId));
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        // Vérifier le mot de passe actuel
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+        {
+            return BadRequest(new { message = "Mot de passe actuel incorrect" });
+        }
+
+        // Mettre à jour le mot de passe
+        var success = await _authService.ChangePasswordAsync(int.Parse(userId), request.NewPassword);
+        if (!success)
+        {
+            return BadRequest(new { message = "Échec de la modification du mot de passe" });
+        }
+
+        return Ok(new { success = true, message = "Mot de passe modifié avec succès" });
+    }
 }
 
 public record LoginRequest(string Email, string Password);
 public record RegisterRequest(string Email, string Password);
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
